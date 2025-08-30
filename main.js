@@ -3,8 +3,8 @@ const TILE = 16;
 
 // Number of tiles across (columns) and down (rows)
 // Game area = 40 * 16px wide (640px) and 30 * 16px tall (480px)
-const COLS = 40;                 
-const ROWS = 30;                 
+const COLS = 85;                 
+const ROWS = 37.74;                 
 
 // Total pixel width and height of the game canvas
 const WIDTH = COLS * TILE;
