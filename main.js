@@ -337,3 +337,29 @@ function placeFood() {
       });
     }
   }
+  /**
+ * endGame()
+ * Called when the snake hits a wall or itself.
+ * - Stops the movement timer (snake no longer moves)
+ * - Displays a "Game Over" message with the final score
+ * - Waits for the player to press Space (handled in update()) to restart
+ */
+function endGame() {
+    // Stop the movement timer so the snake no longer steps forward
+    moveEvent.remove(false);
+  
+    // Define text style for the "Game Over" message
+    const style = {
+      fontFamily: 'monospace',
+      fontSize: 28,
+      color: '#fff',
+      align: 'center'
+    };
+  
+    // Message shows "Game Over", final score, and restart instructions
+    const msg = `Game Over\nScore: ${score}\nPress Space to Restart`;
+  
+    // Add text to the center of the screen
+    // .setOrigin(0.5, 0.5) makes the text anchor at its center
+    this.gameOverText = this.add.text(WIDTH / 2, HEIGHT / 2, msg, style).setOrigin(0.5, 0.5);
+  }
