@@ -90,3 +90,30 @@ function randomFreeCell(excludeCells) {
 function isOpposite(a, b) {
   return a.x === -b.x && a.y === -b.y;
 }
+/**
+ * preload()
+ * Runs once before the game starts.
+ * Used for loading images, sounds, and other assets.
+ * In this version, we use simple colored rectangles (no assets needed).
+ */
+function preload() {
+    // No assets to load in this version.
+  }
+  
+  /**
+   * create()
+   * Runs once after preload. Sets up the game scene.
+   * - Prepares keyboard input
+   * - Calls initGame() to build the snake, food, score UI, and start movement
+   */
+  function create() {
+    // Phaser helper that gives us arrow key input (up, down, left, right)
+    cursors = this.input.keyboard.createCursorKeys();
+  
+    // Register the Space bar key to restart the game later
+    spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+  
+    // Initialize the game state (snake, food, score, timer)
+    // Using call(this) so that initGame runs in the context of the scene
+    initGame.call(this);
+  }
