@@ -224,3 +224,75 @@ function update() {
       initGame.call(this); // Reset everything (snake, food, score, timer)
     }
   }
+  /**
+ * stepSnake()
+ * This function runs every "tick" (based on the timer).
+ * - Moves the snake forward by one cell
+ * - Checks for collisions (wall or self)
+ * - Handles eating food (grow + score)
+ * - Updates the snake's rectangles on the screen
+ */
+function stepSnake() {
+    // Apply the direction chosen in update() (queued by player input)
+    direction = nextDirection;
+  
+    // Get the current head of the snake
+    const head = snake[0];
+  
+    // Create a new head position by moving one cell in the current direction
+    const newHead = { x: head.x + direction.x, y: head.y + direction.y };
+  
+    // === Collision Check #1: Wall ===
+    // If the new head is outside the grid, the game ends
+    if (newHead.x < 0 || newHead.x >= COLS || newHead.y < 0 || newHead.y >= ROWS) {
+      return endGame.call(this);
+    }
+  
+    // === Collision Check #2: Self ===
+    // If the new head overlaps any snake cell, the game ends
+    for (let i = 0; i < snake.length; i++) {
+      if (snake[i].x === newHead.x && snake[i].y === newHead.y) {
+        return endGame.call(this);
+      }
+    }
+  
+    // === Check if food was eaten ===
+    const ate = newHead.x === food.x && newHead.y === food.y;
+  
+    // Add the new head cell to the front of the snake array
+    snake.unshift(newHead);
+  
+    if (!ate) {
+      // Case: Snake did NOT eat food → keep length the same
+      // Remove last cell from snake array (tail)
+      snake.pop();
+  
+      // Reuse the last rectangle object for performance
+      const tailRect = snakeRects.pop();
+      const { px, py } = gridToPixelCenter(newHead.x, newHead.y);
+      tailRect.setPosition(px, py);       // Move it to the new head position
+      snakeRects.unshift(tailRect);       // Put it at the front of the rectangle list
+    } else {
+      // Case: Snake DID eat food → grow longer
+      // Create a new rectangle for the new head (since length increases)
+      const { px, py } = gridToPixelCenter(newHead.x, newHead.y);
+      const headRect = this.add.rectangle(px, py, TILE - 2, TILE - 2, COLORS.head);
+      snakeRects.unshift(headRect);
+  
+      // Increase score and update text
+      score += 10;
+      scoreText.setText(`Score: ${score}`);
+  
+      // Place new food somewhere else
+      placeFood.call(this);
+  
+      // Speed up slightly as difficulty curve
+      maybeSpeedUp.call(this);
+    }
+  
+    // === Update Colors ===
+    // Ensure only index 0 is drawn as the "head" (bright green),
+    // and the next segment becomes part of the "body"
+    if (snakeRects[1]) snakeRects[1].setFillStyle(COLORS.body);
+    snakeRects[0].setFillStyle(COLORS.head);
+  }
