@@ -117,3 +117,79 @@ function preload() {
     // Using call(this) so that initGame runs in the context of the scene
     initGame.call(this);
   }
+  /**
+ * initGame()
+ * Called when the game first starts or after pressing Space to restart.
+ * - Clears old state (snake, food, timers)
+ * - Resets score
+ * - Creates a new snake in the center of the grid
+ * - Spawns the first food
+ * - Sets up score text
+ * - Starts the timed loop that moves the snake
+ */
+function initGame() {
+    // If an old movement timer exists, stop it (avoid multiple timers running)
+    if (moveEvent) moveEvent.remove(false);
+  
+    // If old snake rectangles exist, destroy them to clean the screen
+    if (snakeRects) snakeRects.forEach(r => r.destroy());
+  
+    // Reset the score and snake direction
+    score = 0;
+    direction = DIR.right;     // Snake starts moving to the right
+    nextDirection = DIR.right; // Player input queue also points right
+  
+    // Find the starting position near the center of the grid
+    const startX = Math.floor(COLS / 2);
+    const startY = Math.floor(ROWS / 2);
+  
+    // Snake starts with 3 segments, head + 2 body pieces
+    snake = [
+      { x: startX,     y: startY },     // head (middle)
+      { x: startX - 1, y: startY },     // body segment left of head
+      { x: startX - 2, y: startY },     // tail further left
+    ];
+  
+    // Create rectangle objects in Phaser to visually draw the snake
+    snakeRects = snake.map((cell, i) => {
+      const { px, py } = gridToPixelCenter(cell.x, cell.y); // convert grid to pixel center
+      const color = i === 0 ? COLORS.head : COLORS.body;    // head is a brighter green
+      const rect = this.add.rectangle(px, py, TILE - 2, TILE - 2, color); // slightly smaller for spacing
+      rect.setOrigin(0.5, 0.5);                             // center anchor point
+      return rect;
+    });
+  
+    // Spawn food at a random free cell (not overlapping snake)
+    food = randomFreeCell(snake);
+    const { px, py } = gridToPixelCenter(food.x, food.y);
+  
+    // If food already exists from a previous run, remove it first
+    if (this.foodRect) this.foodRect.destroy();
+  
+    // Draw the new food as a red rectangle
+    this.foodRect = this.add.rectangle(px, py, TILE - 2, TILE - 2, COLORS.food);
+  
+    // If score text does not exist yet, create it
+    // Otherwise (on restart), just reset its value
+    if (!scoreText) {
+      scoreText = this.add.text(8, 6, 'Score: 0', { fontFamily: 'monospace', fontSize: 18, color: '#fff' });
+      this.add.text(8, 28, 'Arrows to move. Space to restart.', { fontFamily: 'monospace', fontSize: 14, color: '#aaa' });
+    } else {
+      scoreText.setText('Score: 0');
+    }
+  
+    // Reset speed and create a repeating timer
+    // Every "speedMs" milliseconds, stepSnake() will run to move the snake
+    speedMs = 130;
+    moveEvent = this.time.addEvent({
+      delay: speedMs,
+      loop: true,
+      callback: () => stepSnake.call(this) // .call(this) keeps Phaser scene context
+    });
+  
+    // If a "Game Over" message exists from the last run, remove it
+    if (this.gameOverText) {
+      this.gameOverText.destroy();
+      this.gameOverText = null;
+    }
+  }
