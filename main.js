@@ -44,3 +44,49 @@ const config = {
 
 // Create a new Phaser game with the config
 new Phaser.Game(config);
+// Snake state
+let snake;           // Array of grid cells [{x, y}, ...]; index 0 = head
+let snakeRects;      // Array of Phaser rectangles drawn at snake cell positions
+let direction;       // Current direction of snake movement (object from DIR)
+let nextDirection;   // Next direction chosen by player input (applied on step)
+let food;            // Current food cell {x, y}
+let score = 0;       // Current score count
+let scoreText;       // Phaser text object that displays the score
+let moveEvent;       // Phaser timer event to move snake at fixed intervals
+let speedMs = 130;   // Delay in milliseconds between moves (lower = faster)
+
+// Input state
+let cursors;         // Phaser helper object for arrow keys
+let spaceKey;        // Phaser Key object for Space bar (restart the game)
+
+/**
+ * Convert a grid cell (x,y) to its pixel center (px,py) on the canvas.
+ * Example: (0,0) -> (8,8) if TILE=16. Ensures rectangles are centered.
+ */
+function gridToPixelCenter(x, y) {
+  return { px: x * TILE + TILE / 2, py: y * TILE + TILE / 2 };
+}
+
+/**
+ * Pick a random grid cell that is not occupied by any cell in excludeCells.
+ * - Creates a Set of occupied cells as "x,y" strings for fast lookup.
+ * - Keeps generating random cells until it finds a free one.
+ * Used to place food so it never spawns on the snake.
+ */
+function randomFreeCell(excludeCells) {
+  const occupied = new Set(excludeCells.map(c => `${c.x},${c.y}`));
+  while (true) {
+    const x = Math.floor(Math.random() * COLS);
+    const y = Math.floor(Math.random() * ROWS);
+    if (!occupied.has(`${x},${y}`)) return { x, y };
+  }
+}
+
+/**
+ * Check if direction 'a' is exactly the opposite of direction 'b'.
+ * Example: left vs right, or up vs down.
+ * This prevents the snake from instantly turning 180° into itself.
+ */
+function isOpposite(a, b) {
+  return a.x === -b.x && a.y === -b.y;
+}
