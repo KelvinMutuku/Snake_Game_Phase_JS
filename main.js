@@ -193,3 +193,34 @@ function initGame() {
       this.gameOverText = null;
     }
   }
+  /**
+ * update()
+ * This runs every frame (Phaser’s game loop).
+ * - Reads player input from arrow keys
+ * - Updates "nextDirection" so the snake will turn on the next step
+ * - Listens for Space bar press to restart the game if it’s over
+ */
+function update() {
+    // Check if LEFT arrow is pressed AND it’s not the opposite of current direction
+    if (cursors.left.isDown && !isOpposite(DIR.left, direction)) {
+      nextDirection = DIR.left;
+  
+    // Check if RIGHT arrow is pressed
+    } else if (cursors.right.isDown && !isOpposite(DIR.right, direction)) {
+      nextDirection = DIR.right;
+  
+    // Check if UP arrow is pressed
+    } else if (cursors.up.isDown && !isOpposite(DIR.up, direction)) {
+      nextDirection = DIR.up;
+  
+    // Check if DOWN arrow is pressed
+    } else if (cursors.down.isDown && !isOpposite(DIR.down, direction)) {
+      nextDirection = DIR.down;
+    }
+  
+    // If the game is over (a "Game Over" text exists)
+    // AND the Space bar was just pressed → restart the game
+    if (this.gameOverText && Phaser.Input.Keyboard.JustDown(spaceKey)) {
+      initGame.call(this); // Reset everything (snake, food, score, timer)
+    }
+  }
