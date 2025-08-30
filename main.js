@@ -296,3 +296,44 @@ function stepSnake() {
     if (snakeRects[1]) snakeRects[1].setFillStyle(COLORS.body);
     snakeRects[0].setFillStyle(COLORS.head);
   }
+  /**
+ * placeFood()
+ * Spawns food at a new random cell that is NOT part of the snake.
+ * - Uses randomFreeCell() to avoid collisions with the snake
+ * - Moves the existing red rectangle (foodRect) to the new spot
+ */
+function placeFood() {
+    // Pick a random free cell on the grid (not occupied by the snake)
+    food = randomFreeCell(snake);
+  
+    // Convert that cell into pixel coordinates
+    const { px, py } = gridToPixelCenter(food.x, food.y);
+  
+    // Move the existing food rectangle to the new position
+    this.foodRect.setPosition(px, py);
+  }
+  
+  /**
+   * maybeSpeedUp()
+   * Makes the game a little harder each time food is eaten.
+   * - Decreases the move delay (snake moves faster)
+   * - Restarts the timer with the new speed
+   * - Stops speeding up once a lower bound (70ms) is reached
+   */
+  function maybeSpeedUp() {
+    // Only speed up if current speed is above the minimum threshold
+    if (speedMs > 70) {
+      // Make the snake faster by reducing the delay
+      speedMs -= 3;
+  
+      // Remove the old movement timer
+      moveEvent.remove(false);
+  
+      // Create a new timer with the updated speed
+      moveEvent = this.time.addEvent({
+        delay: speedMs,            // shorter delay = faster movement
+        loop: true,                // repeat forever until game over
+        callback: () => stepSnake.call(this) // keep "this" as the scene
+      });
+    }
+  }
